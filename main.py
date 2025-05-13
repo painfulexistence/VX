@@ -20,6 +20,7 @@ class VoxelEngine:
             (WINDOW_WIDTH, WINDOW_HEIGHT), flags=pygame.OPENGL | pygame.DOUBLEBUF
         )
         self.ctx = gl.create_context()
+        self.ctx.enable(flags=gl.DEPTH_TEST | gl.CULL_FACE)
         self.ctx.gc_mode = "auto"
 
         self.clock = pygame.time.Clock()
