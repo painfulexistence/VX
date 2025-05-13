@@ -15,6 +15,8 @@ class VoxelEngine:
             pygame.GL_CONTEXT_PROFILE_MASK, pygame.GL_CONTEXT_PROFILE_CORE
         )
         pygame.display.gl_set_attribute(pygame.GL_DEPTH_SIZE, 24)
+        pygame.display.gl_set_attribute(pygame.GL_MULTISAMPLEBUFFERS, 1)
+        pygame.display.gl_set_attribute(pygame.GL_MULTISAMPLESAMPLES, 4)
 
         pygame.display.set_mode(
             (WINDOW_WIDTH, WINDOW_HEIGHT), flags=pygame.OPENGL | pygame.DOUBLEBUF
