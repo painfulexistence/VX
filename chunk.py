@@ -5,10 +5,11 @@ import glm
 
 
 class Chunk:
-    def __init__(self, ctx, shader):
+    def __init__(self, ctx, shader, position):
         self.ctx = ctx
         self.voxels = self.build_voxels()
         self.mesh = ChunkMesh(ctx, shader, self.voxels)
+        self.m_model = glm.translate(glm.mat4(), position)
 
     def build_voxels(self):
         voxels = np.zeros(CHUNK_VOLUME, dtype="uint8")
