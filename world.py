@@ -18,9 +18,7 @@ class World:
         for x in range(WORLD_WIDTH):
             for z in range(WORLD_DEPTH):
                 for y in range(WORLD_HEIGHT):
-                    chunk = Chunk(
-                        self.ctx, self.chunk_shader, glm.vec3(x, y, z) * CHUNK_SIZE
-                    )
+                    chunk = Chunk(self.ctx, self.chunk_shader, (x, y, z))
                     chunk_index = x + z * WORLD_WIDTH + y * WORLD_AREA
                     self.chunks[chunk_index] = chunk
                     # self.voxels[chunk_index] = chunk.build_voxels()
