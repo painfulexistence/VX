@@ -1,7 +1,6 @@
 from chunk import Chunk
 from settings import *
 import numpy as np
-import glm
 
 
 class World:
@@ -18,12 +17,12 @@ class World:
         for x in range(WORLD_WIDTH):
             for z in range(WORLD_DEPTH):
                 for y in range(WORLD_HEIGHT):
-                    chunk = Chunk(self.ctx, self.chunk_shader, (x, y, z))
+                    chunk = Chunk(self.ctx, self.chunk_shader, (x, y, z), self)
                     chunk_index = x + z * WORLD_WIDTH + y * WORLD_AREA
                     self.chunks[chunk_index] = chunk
-                    # self.voxels[chunk_index] = chunk.build_voxels()
-                    # chunk.voxels = self.voxles[chunk_index]
-                    # chunk.build_mesh(self)
+                    self.voxels[chunk_index] = chunk.voxels = chunk.build_voxels()
+        for chunk in self.chunks:
+            chunk.build_mesh() # depends on self.voxels
 
     def update(self, dt):
         for chunk in self.chunks:
@@ -31,5 +30,6 @@ class World:
 
     def render(self):
         for chunk in self.chunks:
-            self.chunk_shader["m_model"].write(chunk.m_model)
-            chunk.render()
+            if not chunk.is_empty:
+                self.chunk_shader["m_model"].write(chunk.m_model)
+                chunk.render()

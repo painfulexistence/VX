@@ -39,12 +39,13 @@ class QuadMesh(BaseMesh):
 
 
 class ChunkMesh(BaseMesh):
-    def __init__(self, ctx, program, voxels):
-        self.voxels = voxels
+    def __init__(self, ctx, program, position, world):
+        self.position = position
+        self.world = world
         super().__init__(ctx, program)
 
     def setup(self):
-        vertex_data = build_chunk_mesh(self.voxels)
+        vertex_data = build_chunk_mesh(self.position, self.world.voxels)
         vbo = self.ctx.buffer(vertex_data)
         self.vao = self.ctx.vertex_array(
             self.program,
@@ -59,16 +60,39 @@ def to_uint8(x, y, z, voxel_id, face_id):
 
 
 @njit
-def is_void(voxel_pos, chunk_voxels):
+def get_chunk_index(chunk_pos):
+    cx, cy, cz = chunk_pos
+    return cx + cz * WORLD_WIDTH + cy * WORLD_AREA
+
+
+@njit
+def is_void(voxel_pos, chunk_pos, world_voxels):
     x, y, z = voxel_pos
-    if 0 <= x < CHUNK_SIZE and 0 <= y < CHUNK_SIZE and 0 <= z < CHUNK_SIZE:
-        if chunk_voxels[x + z * CHUNK_SIZE + y * CHUNK_AREA] > 0:
-            return False
+    cx, cy, cz = chunk_pos
+    wx = x + cx * CHUNK_SIZE
+    wy = y + cy * CHUNK_SIZE
+    wz = z + cz * CHUNK_SIZE
+
+    chunk_index = get_chunk_index((wx // CHUNK_SIZE, wy // CHUNK_SIZE, wz // CHUNK_SIZE))
+    chunk_voxels = world_voxels[chunk_index]
+
+    # Out of bounds
+    if not (
+        0 <= wx < WORLD_WIDTH * CHUNK_SIZE
+        and 0 <= wy < WORLD_HEIGHT * CHUNK_SIZE
+        and 0 <= wz < WORLD_DEPTH * CHUNK_SIZE
+    ):
+        return False
+    # Inside world
+    if (chunk_voxels[x % CHUNK_SIZE + z % CHUNK_SIZE * CHUNK_SIZE + y % CHUNK_SIZE * CHUNK_AREA]> 0):
+        return False
     return True
 
 
 @njit
-def build_chunk_mesh(chunk_voxels):
+def build_chunk_mesh(chunk_pos, world_voxels):
+    chunk_voxels = world_voxels[get_chunk_index(chunk_pos)]
+
     vertex_data = np.empty(CHUNK_VOLUME * 18 * 5, dtype="uint8")
     index = 0
 
@@ -80,7 +104,7 @@ def build_chunk_mesh(chunk_voxels):
                     continue
 
                 # top
-                if is_void((x, y + 1, z), chunk_voxels):
+                if is_void((x, y + 1, z), chunk_pos, world_voxels):
                     v0 = to_uint8(x, y + 1, z, voxel_id, 0)
                     v1 = to_uint8(x, y + 1, z + 1, voxel_id, 0)
                     v2 = to_uint8(x + 1, y + 1, z + 1, voxel_id, 0)
@@ -91,7 +115,7 @@ def build_chunk_mesh(chunk_voxels):
                             index += 1
 
                 # bottom
-                if is_void((x, y - 1, z), chunk_voxels):
+                if is_void((x, y - 1, z), chunk_pos, world_voxels):
                     v0 = to_uint8(x + 1, y, z, voxel_id, 1)
                     v1 = to_uint8(x + 1, y, z + 1, voxel_id, 1)
                     v2 = to_uint8(x, y, z + 1, voxel_id, 1)
@@ -102,7 +126,7 @@ def build_chunk_mesh(chunk_voxels):
                             index += 1
 
                 # right
-                if is_void((x + 1, y, z), chunk_voxels):
+                if is_void((x + 1, y, z), chunk_pos, world_voxels):
                     v0 = to_uint8(x + 1, y + 1, z + 1, voxel_id, 2)
                     v1 = to_uint8(x + 1, y, z + 1, voxel_id, 2)
                     v2 = to_uint8(x + 1, y, z, voxel_id, 2)
@@ -113,7 +137,7 @@ def build_chunk_mesh(chunk_voxels):
                             index += 1
 
                 # left
-                if is_void((x - 1, y, z), chunk_voxels):
+                if is_void((x - 1, y, z), chunk_pos, world_voxels):
                     v0 = to_uint8(x, y + 1, z, voxel_id, 3)
                     v1 = to_uint8(x, y, z, voxel_id, 3)
                     v2 = to_uint8(x, y, z + 1, voxel_id, 3)
@@ -124,7 +148,7 @@ def build_chunk_mesh(chunk_voxels):
                             index += 1
 
                 # front
-                if is_void((x, y, z + 1), chunk_voxels):
+                if is_void((x, y, z + 1), chunk_pos, world_voxels):
                     v0 = to_uint8(x, y + 1, z + 1, voxel_id, 4)
                     v1 = to_uint8(x, y, z + 1, voxel_id, 4)
                     v2 = to_uint8(x + 1, y, z + 1, voxel_id, 4)
@@ -135,7 +159,7 @@ def build_chunk_mesh(chunk_voxels):
                             index += 1
 
                 # back
-                if is_void((x, y, z - 1), chunk_voxels):
+                if is_void((x, y, z - 1), chunk_pos, world_voxels):
                     v0 = to_uint8(x + 1, y + 1, z, voxel_id, 5)
                     v1 = to_uint8(x + 1, y, z, voxel_id, 5)
                     v2 = to_uint8(x, y, z, voxel_id, 5)

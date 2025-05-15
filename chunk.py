@@ -5,11 +5,14 @@ import glm
 
 
 class Chunk:
-    def __init__(self, ctx, shader, position):
+    def __init__(self, ctx, shader, position, world):
         self.ctx = ctx
+        self.shader = shader
         self.position = position
-        self.voxels = self.build_voxels()
-        self.mesh = ChunkMesh(ctx, shader, self.voxels)
+        self.world = world
+        self.is_empty = True
+        self.voxels = np.zeros(CHUNK_VOLUME, dtype="uint8")
+        self.mesh = None
         self.m_model = glm.translate(glm.mat4(), glm.vec3(position) * CHUNK_SIZE)
 
     def build_voxels(self):
@@ -25,7 +28,12 @@ class Chunk:
                 for y in range(local_height):
                     wy = cy + y
                     voxels[x + z * CHUNK_SIZE + y * CHUNK_AREA] = wy + 1
+        if np.any(voxels):
+            self.is_empty = False
         return voxels
+
+    def build_mesh(self):
+        self.mesh = ChunkMesh(self.ctx, self.shader, self.position, self.world)
 
     def update(self):
         pass
