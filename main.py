@@ -21,9 +21,12 @@ class VoxelEngine:
         pygame.display.set_mode(
             (WINDOW_WIDTH, WINDOW_HEIGHT), flags=pygame.OPENGL | pygame.DOUBLEBUF
         )
+        pygame.display.set_caption(f"{WINDOW_TITLE}")
+
         self.ctx = gl.create_context()
-        self.ctx.enable(flags=gl.DEPTH_TEST | gl.CULL_FACE)
         self.ctx.gc_mode = "auto"
+
+        self.ctx.enable(flags=gl.DEPTH_TEST | gl.CULL_FACE)
 
         self.clock = pygame.time.Clock()
         self.running = True

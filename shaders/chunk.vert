@@ -10,6 +10,8 @@ uniform mat4 m_model;
 
 out vec3 color;
 
+float light_level[6] = float[](1.0, 0.5, 0.9, 0.9, 0.9, 0.9);
+
 vec3 palette(float t) {
     // Palette 1
     // vec3 a = vec3(0.80, 0.15, 0.56);
@@ -27,19 +29,20 @@ vec3 palette(float t) {
     // vec3 c = vec3(0.368, 0.650, 0.103);
     // vec3 d = vec3(0.913, 3.624, 0.320);
     // Palette 4
-    // vec3 a = vec3(0.427, 0.346, 0.372);
-    // vec3 b = vec3(0.288, 0.918, 0.336);
-    // vec3 c = vec3(0.635, 1.136, 0.404);
-    // vec3 d = vec3(1.893, 0.663, 1.910);
+    vec3 a = vec3(0.427, 0.346, 0.372);
+    vec3 b = vec3(0.288, 0.918, 0.336);
+    vec3 c = vec3(0.635, 1.136, 0.404);
+    vec3 d = vec3(1.893, 0.663, 1.910);
     // Palette 5
-    vec3 a = vec3(0.746, 0.815, 0.846);
-    vec3 b = vec3(0.195, 0.283, 0.187);
-    vec3 c = vec3(1.093, 1.417, 1.405);
-    vec3 d = vec3(5.435, 2.400, 5.741);
+    // vec3 a = vec3(0.746, 0.815, 0.846);
+    // vec3 b = vec3(0.195, 0.283, 0.187);
+    // vec3 c = vec3(1.093, 1.417, 1.405);
+    // vec3 d = vec3(5.435, 2.400, 5.741);
     return a + b * cos(6.28318 * (c * t + d));
 }
 
 void main() {
-    color = palette(float(voxel_id) / 50.0);
+    color = palette(float(voxel_id) / 50.0) * light_level[face_id];
+
     gl_Position = m_proj * m_view * m_model * vec4(in_position, 1.0);
 }
