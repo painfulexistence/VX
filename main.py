@@ -40,6 +40,9 @@ class VoxelEngine:
     def run(self):
         while self.running:
             dt = self.clock.tick() / 1000
+            pygame.display.set_caption(
+                f"{WINDOW_TITLE} ({int(self.clock.get_fps())} FPS)"
+            )
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
