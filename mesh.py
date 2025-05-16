@@ -38,6 +38,25 @@ class QuadMesh(BaseMesh):
         )
 
 
+class ScreenQuadMesh(BaseMesh):
+    def __init__(self, ctx, program):
+        super().__init__(ctx, program)
+
+    def setup(self):
+        vertices = np.array([
+            -1.0, -1.0,  0.0,  0.0,  0.0,  # bottom left
+             1.0, -1.0,  0.0,  1.0,  0.0,  # bottom right
+             1.0,  1.0,  0.0,  1.0,  1.0,  # top right
+            -1.0,  1.0,  0.0,  0.0,  1.0   # top left
+        ], dtype='f4')
+        indices = np.array([0, 1, 2, 0, 2, 3], dtype='i4')
+        vbo = self.ctx.buffer(vertices.tobytes())
+        ibo = self.ctx.buffer(indices.tobytes())        
+        self.vao = self.ctx.vertex_array(
+            self.program, [(vbo, "3f 2f", "in_position", "in_texcoord")], ibo, skip_errors=True
+        )
+
+
 class ChunkMesh(BaseMesh):
     def __init__(self, ctx, program, position, world):
         self.position = position

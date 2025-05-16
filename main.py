@@ -4,6 +4,7 @@ import glm
 import pygame
 from scene import Scene
 from shader_program import ShaderProgram
+from mesh import ScreenQuadMesh
 
 
 class VoxelEngine:
@@ -36,8 +37,18 @@ class VoxelEngine:
         self.shaders = {
             "quad": ShaderProgram(self.ctx, "quad"),
             "chunk": ShaderProgram(self.ctx, "chunk"),
+            "post": ShaderProgram(self.ctx, "post"),
         }
+
+        self.scene_fbo = self.ctx.framebuffer(
+            color_attachments=[
+                self.ctx.texture((WINDOW_WIDTH, WINDOW_HEIGHT), 4)
+            ],
+            depth_attachment=self.ctx.depth_renderbuffer((WINDOW_WIDTH, WINDOW_HEIGHT))
+        )
+
         self.scene = Scene(self.ctx, self.shaders)
+        self.screen_quad = ScreenQuadMesh(self.ctx, self.shaders["post"].program)
 
     def run(self):
         while self.running:
@@ -52,8 +63,18 @@ class VoxelEngine:
 
             self.scene.update(dt)
 
-            self.ctx.clear(color=glm.vec3(0.58, 0.83, 0.99))
+            self.scene_fbo.use()
+            self.ctx.clear(color=SCENE_BG_COLOR)  # 
             self.scene.render()
+            
+            self.ctx.screen.use()
+            # self.ctx.clear()
+            self.ctx.disable(gl.DEPTH_TEST)
+            self.scene_fbo.color_attachments[0].use(0)
+            self.shaders["post"].program["u_screen_texture"] = 0
+            self.screen_quad.render()
+            self.ctx.enable(gl.DEPTH_TEST)
+
             pygame.display.flip()
 
         pygame.quit()
