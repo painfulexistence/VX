@@ -39,6 +39,7 @@ class VoxelEngine:
             "quad": ShaderProgram(self.ctx, "quad"),
             "chunk": ShaderProgram(self.ctx, "chunk"),
             "post": ShaderProgram(self.ctx, "post"),
+            "skybox": ShaderProgram(self.ctx, "skybox"),
         }
 
         self.scene_fbo = self.ctx.framebuffer(

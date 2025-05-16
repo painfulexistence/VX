@@ -57,6 +57,60 @@ class ScreenQuadMesh(BaseMesh):
         )
 
 
+class SkyboxMesh(BaseMesh):
+    def __init__(self, ctx, program):
+        super().__init__(ctx, program)
+        
+    def setup(self):
+        vertices = np.array([
+            -1.0,  1.0, -1.0,
+            -1.0, -1.0, -1.0,
+             1.0, -1.0, -1.0,
+             1.0, -1.0, -1.0,
+             1.0,  1.0, -1.0,
+            -1.0,  1.0, -1.0,
+
+            -1.0, -1.0,  1.0,
+            -1.0, -1.0, -1.0,
+            -1.0,  1.0, -1.0,
+            -1.0,  1.0, -1.0,
+            -1.0,  1.0,  1.0,
+            -1.0, -1.0,  1.0,
+
+             1.0, -1.0, -1.0,
+             1.0, -1.0,  1.0,
+             1.0,  1.0,  1.0,
+             1.0,  1.0,  1.0,
+             1.0,  1.0, -1.0,
+             1.0, -1.0, -1.0,
+
+            -1.0, -1.0,  1.0,
+            -1.0,  1.0,  1.0,
+             1.0,  1.0,  1.0,
+             1.0,  1.0,  1.0,
+             1.0, -1.0,  1.0,
+            -1.0, -1.0,  1.0,
+
+            -1.0,  1.0, -1.0,
+             1.0,  1.0, -1.0,
+             1.0,  1.0,  1.0,
+             1.0,  1.0,  1.0,
+            -1.0,  1.0,  1.0,
+            -1.0,  1.0, -1.0,
+
+            -1.0, -1.0, -1.0,
+            -1.0, -1.0,  1.0,
+             1.0, -1.0, -1.0,
+             1.0, -1.0, -1.0,
+            -1.0, -1.0,  1.0,
+             1.0, -1.0,  1.0
+        ], dtype='f4')
+        vbo = self.ctx.buffer(vertices.tobytes())
+        self.vao = self.ctx.vertex_array(
+            self.program, [(vbo, '3f', 'in_position')]
+        )
+
+
 class ChunkMesh(BaseMesh):
     def __init__(self, ctx, program, position, world):
         self.position = position
