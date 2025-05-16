@@ -21,7 +21,7 @@ class VoxelEngine:
         pygame.display.set_mode(
             (WINDOW_WIDTH, WINDOW_HEIGHT),
             flags=pygame.OPENGL | pygame.DOUBLEBUF,
-            # vsync=1,
+            vsync=VSYNC,
         )
         pygame.display.set_caption(f"{WINDOW_TITLE}")
 
