@@ -32,6 +32,7 @@ class VoxelEngine:
         self.ctx.enable(flags=gl.DEPTH_TEST | gl.CULL_FACE)
 
         self.clock = pygame.time.Clock()
+        self.start_time = pygame.time.get_ticks()
         self.running = True
 
         self.shaders = {
@@ -72,6 +73,7 @@ class VoxelEngine:
             self.ctx.disable(gl.DEPTH_TEST)
             self.scene_fbo.color_attachments[0].use(0)
             self.shaders["post"].program["u_screen_texture"] = 0
+            self.shaders["post"].program["u_time"] = (pygame.time.get_ticks() - self.start_time) / 1000
             self.screen_quad.render()
             self.ctx.enable(gl.DEPTH_TEST)
 

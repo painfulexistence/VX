@@ -11,6 +11,8 @@ void main() {
     float _ = u_time;
 
     vec4 color = texture(u_screen_texture, texcoord);
+    float levels = 5.0;
+    color.rgb = floor(color.rgb * levels) / levels;
     
     fragColor = color;
 }
