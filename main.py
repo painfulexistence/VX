@@ -16,8 +16,8 @@ class VoxelEngine:
             pygame.GL_CONTEXT_PROFILE_MASK, pygame.GL_CONTEXT_PROFILE_CORE
         )
         pygame.display.gl_set_attribute(pygame.GL_DEPTH_SIZE, 24)
-        pygame.display.gl_set_attribute(pygame.GL_MULTISAMPLEBUFFERS, 1)
-        pygame.display.gl_set_attribute(pygame.GL_MULTISAMPLESAMPLES, 4)
+        # pygame.display.gl_set_attribute(pygame.GL_MULTISAMPLEBUFFERS, 1)
+        # pygame.display.gl_set_attribute(pygame.GL_MULTISAMPLESAMPLES, 4)
 
         pygame.display.set_mode(
             (WINDOW_WIDTH, WINDOW_HEIGHT),
@@ -43,6 +43,12 @@ class VoxelEngine:
 
         self.scene_fbo = self.ctx.framebuffer(
             color_attachments=[
+                self.ctx.texture((WINDOW_WIDTH, WINDOW_HEIGHT), 4, samples=4)
+            ],
+            depth_attachment=self.ctx.depth_renderbuffer((WINDOW_WIDTH, WINDOW_HEIGHT), samples=4),
+        )
+        self.resolve_fbo = self.ctx.framebuffer(
+            color_attachments=[
                 self.ctx.texture((WINDOW_WIDTH, WINDOW_HEIGHT), 4)
             ],
             depth_attachment=self.ctx.depth_renderbuffer((WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -65,13 +71,16 @@ class VoxelEngine:
             self.scene.update(dt)
 
             self.scene_fbo.use()
-            self.ctx.clear(color=SCENE_BG_COLOR)  # 
+            self.ctx.clear(color=SCENE_BG_COLOR)
             self.scene.render()
-            
+
+            self.resolve_fbo.use()
+            self.ctx.copy_framebuffer(self.resolve_fbo, self.scene_fbo)
+
             self.ctx.screen.use()
             # self.ctx.clear()
             self.ctx.disable(gl.DEPTH_TEST)
-            self.scene_fbo.color_attachments[0].use(0)
+            self.resolve_fbo.color_attachments[0].use(0)
             self.shaders["post"].program["u_screen_texture"] = 0
             self.shaders["post"].program["u_time"] = (pygame.time.get_ticks() - self.start_time) / 1000
             self.screen_quad.render()
