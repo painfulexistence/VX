@@ -11,15 +11,27 @@ uniform mat4 m_model;
 out vec3 color;
 out vec3 frag_pos;
 out vec3 normal;
+out vec3 atlas_texcoord;
 
-float light_levels[6] = float[](1.0, 0.5, 0.9, 0.9, 0.9, 0.9);
-vec3 normals[6] = vec3[](
-    vec3(0.0, 1.0, 0.0),
-    vec3(0.0, -1.0, 0.0),
-    vec3(1.0, 0.0, 0.0),
-    vec3(-1.0, 0.0, 0.0),
-    vec3(0.0, 0.0, 1.0),
-    vec3(0.0, 0.0, -1.0)
+const float light_levels[6] = float[](1.0, 0.5, 0.9, 0.9, 0.9, 0.9);
+const vec3 normals[6] = vec3[](
+    vec3(0.0, 1.0, 0.0), // top
+    vec3(0.0, -1.0, 0.0), // bottom
+    vec3(1.0, 0.0, 0.0), // right
+    vec3(-1.0, 0.0, 0.0), // left
+    vec3(0.0, 0.0, 1.0), // front
+    vec3(0.0, 0.0, -1.0) // back
+);
+const int tile_ids[6] = int[](
+    2, 0, 1, 1, 1, 1
+);
+const vec2 uvs[36] = vec2[](
+    vec2(0, 1), vec2(0, 0), vec2(1, 0), vec2(1, 0), vec2(1, 1), vec2(0, 1), // top
+    vec2(0, 1), vec2(0, 0), vec2(1, 0), vec2(1, 0), vec2(1, 1), vec2(0, 1), // bottom
+    vec2(0, 1), vec2(0, 0), vec2(1, 0), vec2(1, 0), vec2(1, 1), vec2(0, 1), // right
+    vec2(0, 1), vec2(0, 0), vec2(1, 0), vec2(1, 0), vec2(1, 1), vec2(0, 1), // left
+    vec2(0, 1), vec2(0, 0), vec2(1, 0), vec2(1, 0), vec2(1, 1), vec2(0, 1), // front
+    vec2(0, 1), vec2(0, 0), vec2(1, 0), vec2(1, 0), vec2(1, 1), vec2(0, 1) // back
 );
 
 vec3 palette(float t) {
@@ -48,10 +60,26 @@ vec3 palette(float t) {
     // vec3 b = vec3(0.195, 0.283, 0.187);
     // vec3 c = vec3(1.093, 1.417, 1.405);
     // vec3 d = vec3(5.435, 2.400, 5.741);
+    // Palette 6
+    // vec3 a = vec3(0.686, 0.933, 0.933);
+    // vec3 b = vec3(0.957, 0.643, 0.957);
+    // vec3 c = vec3(0.867, 0.627, 0.867);
+    // vec3 d = vec3(1.961, 2.871, 1.702);
     return a + b * cos(6.28318 * (c * t + d));
 }
 
 void main() {
+    vec2 uv = uvs[face_id * 6 + gl_VertexID % 6];
+
+    // atlas_texcoord = vec2(
+    //     (tile_ids[face_id] + uv.x) / 3,
+    //     1.0 - ((voxel_id % 8) + uv.y) / 8
+    // );
+    atlas_texcoord = vec3(
+        (tile_ids[face_id] + uv.x) / 3.0,
+        uv.y,
+        voxel_id % 8
+    );
     color = palette(float(voxel_id) / 50.0);
 
     vec4 world_pos = m_model * vec4(in_position, 1.0);

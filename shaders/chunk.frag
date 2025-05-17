@@ -6,15 +6,18 @@ in vec3 color;
 in vec3 frag_pos;
 in vec3 normal;
 
+in vec3 atlas_texcoord;
 uniform float u_water_line;
 uniform vec3 u_under_water_color;
 uniform vec3 u_fog_color;
 uniform float u_fog_density;
 uniform vec3 u_light_direction;
 uniform vec3 u_light_color;
+uniform sampler2DArray u_atlas;
 
 void main() {
-    vec3 col = color;
+    vec3 col = texture(u_atlas, atlas_texcoord).rgb;
+    col = color;
 
     vec3 norm = normalize(normal);
     vec3 diff = max(dot(norm, -u_light_direction), 0.0) * col * u_light_color;
