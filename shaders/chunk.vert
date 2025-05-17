@@ -9,6 +9,7 @@ uniform mat4 m_view;
 uniform mat4 m_model;
 
 out vec3 color;
+out vec3 frag_pos;
 
 float light_level[6] = float[](1.0, 0.5, 0.9, 0.9, 0.9, 0.9);
 
@@ -44,5 +45,7 @@ vec3 palette(float t) {
 void main() {
     color = palette(float(voxel_id) / 50.0) * light_level[face_id];
 
-    gl_Position = m_proj * m_view * m_model * vec4(in_position, 1.0);
+    vec4 world_pos = m_model * vec4(in_position, 1.0);
+    frag_pos = world_pos.xyz;
+    gl_Position = m_proj * m_view * world_pos;
 }

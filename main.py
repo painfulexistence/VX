@@ -29,7 +29,7 @@ class VoxelEngine:
         self.ctx = gl.create_context()
         self.ctx.gc_mode = "auto"
 
-        self.ctx.enable(flags=gl.DEPTH_TEST | gl.CULL_FACE)
+        self.ctx.enable(flags=gl.DEPTH_TEST | gl.CULL_FACE | gl.BLEND)
 
         self.clock = pygame.time.Clock()
         self.start_time = pygame.time.get_ticks()
@@ -40,6 +40,7 @@ class VoxelEngine:
             "chunk": ShaderProgram(self.ctx, "chunk"),
             "post": ShaderProgram(self.ctx, "post"),
             "skybox": ShaderProgram(self.ctx, "skybox"),
+            "water": ShaderProgram(self.ctx, "water"),
         }
 
         self.scene_fbo = self.ctx.framebuffer(
@@ -60,19 +61,21 @@ class VoxelEngine:
 
     def run(self):
         while self.running:
-            dt = self.clock.tick() / 1000
-            pygame.display.set_caption(
-                f"{WINDOW_TITLE} ({int(self.clock.get_fps())} FPS)"
-            )
-
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
+
+            dt = self.clock.tick() / 1000
+            elapsed_time = (pygame.time.get_ticks() - self.start_time) / 1000
+            pygame.display.set_caption(
+                f"{WINDOW_TITLE} ({int(self.clock.get_fps())} FPS)"
+            )
 
             self.scene.update(dt)
 
             self.scene_fbo.use()
             self.ctx.clear(color=SCENE_BG_COLOR)
+            self.shaders["water"].program["u_time"] = elapsed_time;
             self.scene.render()
 
             self.resolve_fbo.use()
@@ -83,7 +86,7 @@ class VoxelEngine:
             self.ctx.disable(gl.DEPTH_TEST)
             self.resolve_fbo.color_attachments[0].use(0)
             self.shaders["post"].program["u_screen_texture"] = 0
-            self.shaders["post"].program["u_time"] = (pygame.time.get_ticks() - self.start_time) / 1000
+            self.shaders["post"].program["u_time"] = elapsed_time
             self.screen_quad.render()
             self.ctx.enable(gl.DEPTH_TEST)
 

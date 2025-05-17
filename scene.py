@@ -1,6 +1,7 @@
 from skybox import Skybox
 from world import World
 from player import Player
+from water import Water
 import glm
 from settings import *
 
@@ -11,7 +12,8 @@ class Scene:
         self.shaders = shaders
         self.chunk_shader = self.shaders["chunk"].program
         self.skybox_shader = self.shaders["skybox"].program
-        
+        self.water_shader = self.shaders["water"].program
+
         self.skybox = Skybox(self.ctx, self.skybox_shader)
         self.world = World(self.ctx, self.shaders)
         self.player = Player(
@@ -21,19 +23,27 @@ class Scene:
                 WORLD_DEPTH * HALF_CHUNK_SIZE,
             )
         )
+        self.water = Water(self.ctx, self.water_shader)
 
     def update(self, dt):
         self.world.update(dt)
         self.player.update(dt)
+        self.water.update(dt)
 
     def render(self):
         view_matrix = glm.mat4(glm.mat3(self.player.view_matrix)) # getting rid of translation
         self.skybox_shader["m_proj"].write(self.player.proj_matrix)
         self.skybox_shader["m_view"].write(view_matrix)
-        self.skybox_shader["u_sky_color"].write(COLOR_LAVENDER)
-        self.skybox_shader["u_horizon_color"].write(COLOR_LEMON_CREAM)
         self.skybox.render()
 
         self.chunk_shader["m_proj"].write(self.player.proj_matrix)
         self.chunk_shader["m_view"].write(self.player.view_matrix)
+        self.chunk_shader["u_water_line"].value = WATER_LINE
+        self.chunk_shader["u_under_water_color"].write(self.water.deep_color)
+        self.chunk_shader["u_fog_color"].write(self.skybox.sky_color)
         self.world.render()
+
+        self.water_shader["m_proj"].write(self.player.proj_matrix)
+        self.water_shader["m_view"].write(self.player.view_matrix)
+        self.water_shader["u_fog_color"].write(self.skybox.sky_color)
+        self.water.render()

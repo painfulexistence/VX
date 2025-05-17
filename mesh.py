@@ -243,3 +243,28 @@ def build_chunk_mesh(chunk_pos, world_voxels):
                             index += 1
 
     return vertex_data[: index + 1]
+
+
+class WaterMesh(BaseMesh):
+    def __init__(self, ctx, shader, size):
+        self.size = size
+        super().__init__(ctx, shader)
+
+    def setup(self):
+        vertices = []
+        indices = []        
+        for z in range(self.size[1] + 1):
+            for x in range(self.size[0] + 1):
+                vertices.extend([x, 0, z]) # position
+                vertices.extend([0, 1, 0]) # normal
+                vertices.extend([x/self.size[0], z/self.size[1]]) # texcoord
+        for z in range(self.size[1]):
+            for x in range(self.size[0]):
+                offset = z * (self.size[0] + 1) + x
+                indices.extend([offset, offset + self.size[0] + 1, offset + 1])
+                indices.extend([offset + 1, offset + self.size[0] + 1, offset + self.size[0] + 2])
+        vbo = self.ctx.buffer(np.array(vertices, dtype="f4").tobytes())
+        ibo = self.ctx.buffer(np.array(indices, dtype="i4").tobytes())
+        self.vao = self.ctx.vertex_array(
+            self.program, [(vbo, "3f 3f 2f", "in_position", "in_normal", "in_texcoord")], ibo, skip_errors=True
+        )

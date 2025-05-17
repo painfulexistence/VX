@@ -1,6 +1,5 @@
-import moderngl as gl
 from mesh import SkyboxMesh
-
+from settings import *
 
 class Skybox:
     def __init__(self, ctx, shader):
@@ -12,8 +11,13 @@ class Skybox:
         #     components=3,
         #     data=None
         # )
-        
-    def render(self):        
+        self.sky_color = COLOR_MINT_GREEN
+        self.horizon_color = COLOR_LEMON_CREAM
+
+    def render(self):
+        self.shader["u_sky_color"].write(self.sky_color)
+        self.shader["u_horizon_color"].write(self.horizon_color)
+
         self.ctx.depth_func = "<="
         self.ctx.depth_mask = False
         # self.texture.use(0)

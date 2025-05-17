@@ -1,0 +1,26 @@
+#version 330 core
+
+in vec2 uv;
+in vec3 normal;
+in vec3 frag_pos;
+in float depth;
+
+uniform vec3 u_deep_color;
+uniform vec3 u_shallow_color;
+uniform vec3 u_fog_color;
+
+out vec4 fragColor;
+
+void main() {
+    vec3 col = mix(u_shallow_color, u_deep_color, smoothstep(16.0, 32.0, -depth));
+
+    vec3 view_dir = normalize(-frag_pos);
+    vec3 norm = normalize(normal);
+    float fresnel = pow(1.0 - max(dot(norm, view_dir), 0.0), 3.0);
+    col = mix(col, vec3(1.0), fresnel * 0.5);
+
+    float dist = gl_FragCoord.z / gl_FragCoord.w;
+    col = mix(col, u_fog_color, 1.0 - exp(-0.00002 * dist * dist));
+    
+    fragColor = vec4(col, 0.5);
+}
