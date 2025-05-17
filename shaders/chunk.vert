@@ -10,8 +10,17 @@ uniform mat4 m_model;
 
 out vec3 color;
 out vec3 frag_pos;
+out vec3 normal;
 
-float light_level[6] = float[](1.0, 0.5, 0.9, 0.9, 0.9, 0.9);
+float light_levels[6] = float[](1.0, 0.5, 0.9, 0.9, 0.9, 0.9);
+vec3 normals[6] = vec3[](
+    vec3(0.0, 1.0, 0.0),
+    vec3(0.0, -1.0, 0.0),
+    vec3(1.0, 0.0, 0.0),
+    vec3(-1.0, 0.0, 0.0),
+    vec3(0.0, 0.0, 1.0),
+    vec3(0.0, 0.0, -1.0)
+);
 
 vec3 palette(float t) {
     // Palette 1
@@ -43,9 +52,11 @@ vec3 palette(float t) {
 }
 
 void main() {
-    color = palette(float(voxel_id) / 50.0) * light_level[face_id];
+    color = palette(float(voxel_id) / 50.0);
 
     vec4 world_pos = m_model * vec4(in_position, 1.0);
     frag_pos = world_pos.xyz;
+    normal = mat3(transpose(inverse(m_model))) * normals[face_id];
+
     gl_Position = m_proj * m_view * world_pos;
 }

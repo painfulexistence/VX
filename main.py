@@ -40,6 +40,7 @@ class VoxelEngine:
             "chunk": ShaderProgram(self.ctx, "chunk"),
             "post": ShaderProgram(self.ctx, "post"),
             "skybox": ShaderProgram(self.ctx, "skybox"),
+            "sun": ShaderProgram(self.ctx, "sun"),
             "water": ShaderProgram(self.ctx, "water"),
         }
 
