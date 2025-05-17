@@ -32,7 +32,7 @@ class World:
         texture.repeat_x = False
         texture.repeat_y = False
         texture.build_mipmaps()
-        texture.filter = (gl.NEAREST_MIPMAP_NEAREST, gl.NEAREST)
+        texture.filter = (gl.NEAREST_MIPMAP_NEAREST, gl.NEAREST) # use nearest to prevent bleeding
         texture.anisotropy = 16.0
         self.atlas_texture = texture
 

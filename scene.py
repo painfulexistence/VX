@@ -47,6 +47,7 @@ class Scene:
 
         self.chunk_shader["m_proj"].write(self.player.proj_matrix)
         self.chunk_shader["m_view"].write(self.player.view_matrix)
+        self.chunk_shader["u_camera_pos"].write(self.player.position)
         self.chunk_shader["u_water_line"].value = WATER_LINE
         self.chunk_shader["u_under_water_color"].write(self.water.deep_color)
         self.chunk_shader["u_fog_color"].write(self.skybox.sky_color)

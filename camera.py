@@ -3,8 +3,8 @@ import glm
 
 
 class Camera:
-    def __init__(self, origin, yaw, pitch) -> None:
-        self.origin = glm.vec3(origin)
+    def __init__(self, position, yaw, pitch) -> None:
+        self.position = glm.vec3(position)
         self.yaw = glm.radians(yaw)
         self.pitch = glm.radians(pitch)
 
@@ -24,10 +24,10 @@ class Camera:
         self.right = glm.cross(self.forward, glm.vec3(0, 1, 0))
         self.up = glm.cross(self.right, self.forward)
 
-        self.view_matrix = glm.lookAt(self.origin, self.origin + self.forward, self.up)
+        self.view_matrix = glm.lookAt(self.position, self.position + self.forward, self.up)
 
     def move(self, delta):
-        self.origin += delta.x * self.right + delta.y * self.up + delta.z * self.forward
+        self.position += delta.x * self.right + delta.y * self.up + delta.z * self.forward
 
     def rotate_yaw(self, delta):
         self.yaw += delta
