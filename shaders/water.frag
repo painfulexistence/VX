@@ -8,6 +8,7 @@ in float depth;
 uniform vec3 u_deep_color;
 uniform vec3 u_shallow_color;
 uniform vec3 u_fog_color;
+uniform float u_fog_density;
 
 out vec4 fragColor;
 
@@ -20,7 +21,7 @@ void main() {
     col = mix(col, vec3(1.0), fresnel * 0.5);
 
     float dist = gl_FragCoord.z / gl_FragCoord.w;
-    col = mix(col, u_fog_color, 1.0 - exp(-0.00002 * dist * dist));
+    col = mix(col, u_fog_color, 1.0 - exp(-u_fog_density * dist * dist));
     
     fragColor = vec4(col, 0.5);
 }
