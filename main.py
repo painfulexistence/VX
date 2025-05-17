@@ -42,23 +42,55 @@ class VoxelEngine:
             "skybox": ShaderProgram(self.ctx, "skybox"),
             "sun": ShaderProgram(self.ctx, "sun"),
             "water": ShaderProgram(self.ctx, "water"),
+            "brightness": ShaderProgram(self.ctx, "brightness"),
+            "blur_h": ShaderProgram(self.ctx, "blur_h"),
+            "blur_v": ShaderProgram(self.ctx, "blur_v"),
+            "bloom": ShaderProgram(self.ctx, "bloom"),
         }
 
         self.scene_fbo = self.ctx.framebuffer(
             color_attachments=[
-                self.ctx.texture((WINDOW_WIDTH, WINDOW_HEIGHT), 4, samples=4)
+                self.ctx.texture((WINDOW_WIDTH, WINDOW_HEIGHT), 4, samples=4, dtype="f4")
             ],
             depth_attachment=self.ctx.depth_renderbuffer((WINDOW_WIDTH, WINDOW_HEIGHT), samples=4),
         )
         self.resolve_fbo = self.ctx.framebuffer(
             color_attachments=[
-                self.ctx.texture((WINDOW_WIDTH, WINDOW_HEIGHT), 4)
+                self.ctx.texture((WINDOW_WIDTH, WINDOW_HEIGHT), 4, dtype="f4")
             ],
             depth_attachment=self.ctx.depth_renderbuffer((WINDOW_WIDTH, WINDOW_HEIGHT))
         )
+        self.brightness_fbo = self.ctx.framebuffer(
+            color_attachments=[
+                self.ctx.texture((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2), 4, dtype="f4")
+            ]
+        )
+        self.blur_fbos = [
+            self.ctx.framebuffer(
+                color_attachments=[
+                    self.ctx.texture((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2), 4, dtype="f4")
+                ]
+            ),
+            self.ctx.framebuffer(
+                color_attachments=[
+                    self.ctx.texture((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2), 4, dtype="f4")
+                ]
+            )
+        ]
+        self.bloom_fbo = self.ctx.framebuffer(
+            color_attachments=[
+                self.ctx.texture((WINDOW_WIDTH, WINDOW_HEIGHT), 4, dtype="f4")
+            ]
+        )
 
         self.scene = Scene(self.ctx, self.shaders)
-        self.screen_quad = ScreenQuadMesh(self.ctx, self.shaders["post"].program)
+        self.brightness_quad = ScreenQuadMesh(self.ctx, self.shaders["brightness"].program)
+        self.blur_quads = [
+            ScreenQuadMesh(self.ctx, self.shaders["blur_h"].program),
+            ScreenQuadMesh(self.ctx, self.shaders["blur_v"].program),
+        ]
+        self.bloom_quad = ScreenQuadMesh(self.ctx, self.shaders["bloom"].program)
+        self.post_quad = ScreenQuadMesh(self.ctx, self.shaders["post"].program)
 
     def run(self):
         while self.running:
@@ -82,13 +114,46 @@ class VoxelEngine:
             self.resolve_fbo.use()
             self.ctx.copy_framebuffer(self.resolve_fbo, self.scene_fbo)
 
+            self.brightness_fbo.use()
+            self.resolve_fbo.color_attachments[0].use(0)
+            self.shaders["brightness"].program["u_texture"] = 0
+            self.brightness_quad.render()
+
+            self.blur_fbos[0].use()
+            self.brightness_fbo.color_attachments[0].use(0)
+            self.shaders["blur_h"].program["u_texture"] = 0
+            self.blur_quads[0].render()
+
+            self.blur_fbos[1].use()
+            self.blur_fbos[0].color_attachments[0].use(0)
+            self.shaders["blur_v"].program["u_texture"] = 0
+            self.blur_quads[1].render()
+                
+            for i in range(4):
+                self.blur_fbos[0].use()
+                self.blur_fbos[1].color_attachments[0].use(0)
+                self.shaders["blur_h"].program["u_texture"] = 0
+                self.blur_quads[0].render()
+
+                self.blur_fbos[1].use()
+                self.blur_fbos[0].color_attachments[0].use(0)
+                self.shaders["blur_v"].program["u_texture"] = 0
+                self.blur_quads[1].render()
+            
+            self.bloom_fbo.use()
+            self.resolve_fbo.color_attachments[0].use(0)
+            self.blur_fbos[0].color_attachments[0].use(1)
+            self.shaders["bloom"].program["u_screen_texture"] = 0
+            self.shaders["bloom"].program["u_bloom_texture"] = 1
+            self.bloom_quad.render()
+
             self.ctx.screen.use()
             # self.ctx.clear()
             self.ctx.disable(gl.DEPTH_TEST)
-            self.resolve_fbo.color_attachments[0].use(0)
+            self.bloom_fbo.color_attachments[0].use(0)
             self.shaders["post"].program["u_screen_texture"] = 0
             self.shaders["post"].program["u_time"] = elapsed_time
-            self.screen_quad.render()
+            self.post_quad.render()
             self.ctx.enable(gl.DEPTH_TEST)
 
             pygame.display.flip()
