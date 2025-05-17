@@ -14,7 +14,9 @@ void main() {
     vec3 col = color;
 
     float dist = gl_FragCoord.z / gl_FragCoord.w;
-    col = mix(col, u_fog_color, 1.0 - exp(-u_fog_density * dist * dist));
+    float height_factor = smoothstep(0.0, 24.0, frag_pos.y);
+    vec3 fog_color = mix(u_fog_color * 0.5, u_fog_color, height_factor);
+    col = mix(col, fog_color, 1.0 - exp(-u_fog_density * dist * dist));
 
     if (frag_pos.y < u_water_line) {
         col *= 0.8;
