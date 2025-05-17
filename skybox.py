@@ -11,8 +11,10 @@ class Skybox:
         #     components=3,
         #     data=None
         # )
-        self.sky_color = COLOR_MINT_GREEN
-        self.horizon_color = COLOR_LEMON_CREAM
+        # self.sky_color = COLOR_MINT_GREEN
+        # self.horizon_color = COLOR_LEMON_CREAM
+        self.sky_color = COLOR_ORANGE_DUST
+        self.horizon_color = COLOR_DARK_ORANGE
 
     def render(self):
         self.shader["u_sky_color"].write(self.sky_color)

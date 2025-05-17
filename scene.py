@@ -41,11 +41,11 @@ class Scene:
         self.chunk_shader["u_water_line"].value = WATER_LINE
         self.chunk_shader["u_under_water_color"].write(self.water.deep_color)
         self.chunk_shader["u_fog_color"].write(self.skybox.sky_color)
-        self.chunk_shader["u_fog_density"].value = 0.00001
+        self.chunk_shader["u_fog_density"].value = 0.00004
         self.world.render()
 
         self.water_shader["m_proj"].write(self.player.proj_matrix)
         self.water_shader["m_view"].write(self.player.view_matrix)
         self.water_shader["u_fog_color"].write(self.skybox.sky_color)
-        self.water_shader["u_fog_density"].value = 0.00001
+        self.water_shader["u_fog_density"].value = 0.00004
         self.water.render()

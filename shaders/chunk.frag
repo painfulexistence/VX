@@ -18,6 +18,8 @@ void main() {
     vec3 fog_color = mix(u_fog_color * 0.5, u_fog_color, height_factor);
     col = mix(col, fog_color, 1.0 - exp(-u_fog_density * dist * dist));
 
+    col = pow(col, vec3(1.2));
+
     if (frag_pos.y < u_water_line) {
         col *= 0.8;
         col = mix(col, u_under_water_color, 0.5);

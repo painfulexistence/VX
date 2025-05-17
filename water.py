@@ -8,8 +8,10 @@ class Water:
         self.ctx = ctx
         self.mesh = WaterMesh(ctx, shader, (CHUNK_SIZE * WORLD_WIDTH, CHUNK_SIZE * WORLD_DEPTH))
         self.shader = shader
-        self.deep_color = COLOR_MINT_GREEN
-        self.shallow_color = COLOR_MINT_GREEN
+        # self.deep_color = COLOR_MINT_GREEN
+        # self.shallow_color = COLOR_MINT_GREEN
+        self.deep_color = COLOR_NEON_BLUE
+        self.shallow_color = COLOR_NEON_BLUE
         self.wave_speed = 1.0
         self.wave_strength = 0.1
         z_offset = 0.01 # to avoid z-fighting
