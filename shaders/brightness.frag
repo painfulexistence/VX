@@ -13,8 +13,13 @@ void main() {
     vec3 color = texture(u_texture, texcoord).rgb;
     
     float brightness = dot(color, vec3(0.2126, 0.7152, 0.0722));
-    float contribution = max(0.0, brightness - threshold);
-    color *= contribution / (brightness + 0.00001);
+    if (brightness > 1.0) {
+        fragColor = vec4(color, 1.0);
+    } else {
+        fragColor = vec4(0.0, 0.0, 0.0, 1.0);
+    }
+    // float contribution = max(0.0, brightness - threshold);
+    // color *= contribution / (brightness + 0.00001);
     
-    fragColor = vec4(color, 1.0);
+    // fragColor = vec4(color, 1.0);
 } 

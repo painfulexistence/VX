@@ -45,6 +45,8 @@ class VoxelEngine:
             "brightness": ShaderProgram(self.ctx, "brightness"),
             "blur_h": ShaderProgram(self.ctx, "blur_h"),
             "blur_v": ShaderProgram(self.ctx, "blur_v"),
+            "upsample": ShaderProgram(self.ctx, "upsample"),
+            "downsample": ShaderProgram(self.ctx, "downsample"),
             "bloom": ShaderProgram(self.ctx, "bloom"),
         }
 
@@ -77,6 +79,15 @@ class VoxelEngine:
                 ]
             )
         ]
+        self.pyramid_fbos = []
+        for i in range(5):
+            self.pyramid_fbos.append(
+                self.ctx.framebuffer(
+                    color_attachments=[
+                        self.ctx.texture((WINDOW_WIDTH // 2**i, WINDOW_HEIGHT // 2**i), 4, dtype="f4")
+                    ]
+                )
+            )
         self.bloom_fbo = self.ctx.framebuffer(
             color_attachments=[
                 self.ctx.texture((WINDOW_WIDTH, WINDOW_HEIGHT), 4, dtype="f4")
@@ -89,6 +100,8 @@ class VoxelEngine:
             ScreenQuadMesh(self.ctx, self.shaders["blur_h"].program),
             ScreenQuadMesh(self.ctx, self.shaders["blur_v"].program),
         ]
+        self.downsample_quad = ScreenQuadMesh(self.ctx, self.shaders["downsample"].program)
+        self.upsample_quad = ScreenQuadMesh(self.ctx, self.shaders["upsample"].program)
         self.bloom_quad = ScreenQuadMesh(self.ctx, self.shaders["bloom"].program)
         self.post_quad = ScreenQuadMesh(self.ctx, self.shaders["post"].program)
 
@@ -114,38 +127,72 @@ class VoxelEngine:
             self.resolve_fbo.use()
             self.ctx.copy_framebuffer(self.resolve_fbo, self.scene_fbo)
 
+            self.ctx.disable(gl.BLEND)
+
             self.brightness_fbo.use()
             self.resolve_fbo.color_attachments[0].use(0)
             self.shaders["brightness"].program["u_texture"] = 0
             self.brightness_quad.render()
 
-            self.blur_fbos[0].use()
-            self.brightness_fbo.color_attachments[0].use(0)
-            self.shaders["blur_h"].program["u_texture"] = 0
-            self.blur_quads[0].render()
+            # Gaussian blur bloom
+            # self.blur_fbos[0].use()
+            # self.brightness_fbo.color_attachments[0].use(0)
+            # self.shaders["blur_h"].program["u_texture"] = 0
+            # self.blur_quads[0].render()
 
-            self.blur_fbos[1].use()
-            self.blur_fbos[0].color_attachments[0].use(0)
-            self.shaders["blur_v"].program["u_texture"] = 0
-            self.blur_quads[1].render()
+            # self.blur_fbos[1].use()
+            # self.blur_fbos[0].color_attachments[0].use(0)
+            # self.shaders["blur_v"].program["u_texture"] = 0
+            # self.blur_quads[1].render()
                 
-            for i in range(4):
-                self.blur_fbos[0].use()
-                self.blur_fbos[1].color_attachments[0].use(0)
-                self.shaders["blur_h"].program["u_texture"] = 0
-                self.blur_quads[0].render()
+            # for i in range(4):
+            #     self.blur_fbos[0].use()
+            #     self.blur_fbos[1].color_attachments[0].use(0)
+            #     self.shaders["blur_h"].program["u_texture"] = 0
+            #     self.blur_quads[0].render()
 
-                self.blur_fbos[1].use()
-                self.blur_fbos[0].color_attachments[0].use(0)
-                self.shaders["blur_v"].program["u_texture"] = 0
-                self.blur_quads[1].render()
-            
+            #     self.blur_fbos[1].use()
+            #     self.blur_fbos[0].color_attachments[0].use(0)
+            #     self.shaders["blur_v"].program["u_texture"] = 0
+            #     self.blur_quads[1].render()
+
+            # self.bloom_fbo.use()
+            # self.resolve_fbo.color_attachments[0].use(0)
+            # self.blur_fbos[0].color_attachments[0].use(1)
+            # self.shaders["bloom"].program["u_screen_texture"] = 0
+            # self.shaders["bloom"].program["u_bloom_texture"] = 1
+            # self.shaders["bloom"].program["u_bloom_strength"] = 0.08
+            # self.bloom_quad.render()
+
+            # Physically based bloom
+            self.pyramid_fbos[0].use()
+            self.brightness_fbo.color_attachments[0].use(0)
+            self.shaders["downsample"].program["u_texture"] = 0
+            self.downsample_quad.render()
+
+            for i in range(1, len(self.pyramid_fbos)):
+                self.pyramid_fbos[i].use()
+                self.pyramid_fbos[i - 1].color_attachments[0].use(0)
+                self.shaders["downsample"].program["u_texture"] = 0
+                self.downsample_quad.render()
+
+            for i in range(len(self.pyramid_fbos) - 2, -1, -1):
+                self.pyramid_fbos[i].use()
+                self.pyramid_fbos[i + 1].color_attachments[0].use(0)
+                self.pyramid_fbos[i].color_attachments[0].use(1)
+                self.shaders["upsample"].program["u_texture"] = 0
+                self.shaders["upsample"].program["u_blend_texture"] = 1
+                self.upsample_quad.render()
+
             self.bloom_fbo.use()
             self.resolve_fbo.color_attachments[0].use(0)
-            self.blur_fbos[0].color_attachments[0].use(1)
+            self.pyramid_fbos[0].color_attachments[0].use(1)
             self.shaders["bloom"].program["u_screen_texture"] = 0
             self.shaders["bloom"].program["u_bloom_texture"] = 1
-            self.bloom_quad.render()
+            self.shaders["bloom"].program["u_bloom_strength"] = 0.08
+            self.bloom_quad.render()            
+
+            self.ctx.enable(gl.BLEND)
 
             self.ctx.screen.use()
             # self.ctx.clear()
@@ -153,6 +200,7 @@ class VoxelEngine:
             self.bloom_fbo.color_attachments[0].use(0)
             self.shaders["post"].program["u_screen_texture"] = 0
             self.shaders["post"].program["u_time"] = elapsed_time
+            self.shaders["post"].program["u_exposure"] = 1.5
             self.post_quad.render()
             self.ctx.enable(gl.DEPTH_TEST)
 

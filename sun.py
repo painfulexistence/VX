@@ -10,8 +10,8 @@ class Sun:
         self.mesh = QuadMesh(ctx, shader)
         self.height = 64
         self.radius = 20.0
-        self.color = COLOR_VIVID_GOLD * 10.0
-        self.light_color = COLOR_WHITE * 3.0
+        self.color = COLOR_VIVID_GOLD * 50.0
+        self.light_color = COLOR_WHITE * 5.0
         self.light_direction = glm.normalize(glm.vec3(0.0, -1.0, 0.5))
         self.m_model = self.get_model_matrix()
 

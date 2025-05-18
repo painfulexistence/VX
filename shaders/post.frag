@@ -3,6 +3,7 @@
 layout(location = 0) out vec4 fragColor;
 
 uniform sampler2D u_screen_texture;
+uniform float u_exposure;
 uniform float u_time;
 
 in vec2 texcoord;
@@ -10,10 +11,9 @@ in vec2 texcoord;
 
 const float gamma = 2.2;
 const float inv_gamma = 1.0 / gamma;
-const float exposure = 1.5;
 
 vec3 exponential_tonemap(vec3 col) {
-    return vec3(1.0) - exp(-col * exposure);
+    return vec3(1.0) - exp(-col);
 }
 
 vec3 aces_tonemap(vec3 col) {
@@ -44,7 +44,7 @@ void main() {
     col = pow(col, vec3(gamma));
 
     // Exposure
-    col *= exposure;
+    col *= u_exposure;
 
     // Tone mapping
     col = uncharted2_tonemap(col);
