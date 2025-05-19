@@ -1,4 +1,5 @@
 from mesh import ChunkMesh
+from bounding_volume import BoundingSphere
 from settings import *
 import numpy as np
 import glm
@@ -14,6 +15,7 @@ class Chunk:
         self.voxels = np.zeros(CHUNK_VOLUME, dtype="uint8")
         self.mesh = None
         self.m_model = glm.translate(glm.mat4(), glm.vec3(position) * CHUNK_SIZE)
+        self.bsphere = BoundingSphere(glm.vec3(position) * CHUNK_SIZE + glm.vec3(HALF_CHUNK_SIZE), CHUNK_BSPHERE_RADIUS)
 
     def build_voxels(self):
         voxels = np.zeros(CHUNK_VOLUME, dtype="uint8")

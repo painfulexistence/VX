@@ -51,10 +51,13 @@ class World:
         for chunk in self.chunks:
             chunk.update()
 
-    def render(self):
+    def render(self, camera):
         self.atlas_texture.use(0)
         self.chunk_shader["u_atlas"] = 0
+        rendered_chunks = 0
         for chunk in self.chunks:
-            if not chunk.is_empty:
+            if not chunk.is_empty and camera.is_visible(chunk.bsphere):
                 self.chunk_shader["m_model"].write(chunk.m_model)
                 chunk.render()
+                rendered_chunks += 1
+        # print(rendered_chunks)

@@ -27,6 +27,7 @@ class Scene:
             )
         )
         self.water = Water(self.ctx, self.water_shader)
+        self.camera = self.player
 
     def update(self, dt):
         self.world.update(dt)
@@ -54,7 +55,7 @@ class Scene:
         self.chunk_shader["u_fog_density"].value = 0.00001
         self.chunk_shader["u_light_direction"].write(self.sun.light_direction)
         self.chunk_shader["u_light_color"].write(self.sun.light_color)
-        self.world.render()
+        self.world.render(self.camera)
 
         self.water_shader["m_proj"].write(self.player.proj_matrix)
         self.water_shader["m_view"].write(self.player.view_matrix)
