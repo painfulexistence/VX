@@ -4,6 +4,7 @@ layout(location = 0) out vec4 fragColor;
 
 uniform sampler2D u_screen_texture;
 uniform sampler2D u_depth_texture;
+uniform sampler2D u_normal_texture;
 uniform float u_exposure;
 uniform float u_time;
 uniform float u_near_z;
@@ -48,8 +49,9 @@ void main() {
 
     vec3 col = texture(u_screen_texture, texcoord).rgb;
     float depth = texture(u_depth_texture, texcoord).r;
-    // float d = linearize_depth(depth);
-    // float d_norm = d / u_far_z;
+    vec3 normal = texture(u_normal_texture, texcoord).rgb;
+    float d = linearize_depth(depth);
+    float d_norm = d / u_far_z;
 
     // sRGB to linear
     col = pow(col, vec3(gamma));

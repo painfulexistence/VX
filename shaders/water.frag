@@ -1,6 +1,7 @@
 #version 330 core
 
 layout(location = 0) out vec4 fragColor;
+layout(location = 1) out vec4 fragNormal;
 
 in vec2 uv;
 in vec3 normal;
@@ -29,4 +30,5 @@ void main() {
     col = mix(col, u_fog_color, 1.0 - exp(-u_fog_density * dist * dist));
     
     fragColor = vec4(col, 0.5);
+    fragNormal = vec4(norm, 1.0);
 }

@@ -1,6 +1,7 @@
 #version 330 core
 
 layout(location = 0) out vec4 fragColor;
+layout(location = 1) out vec4 fragNormal;
 
 in vec3 color;
 in vec3 frag_pos;
@@ -42,4 +43,5 @@ void main() {
     }
 
     fragColor = vec4(col, 1.0);
+    fragNormal = vec4(norm, 1.0);
 }

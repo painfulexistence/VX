@@ -52,13 +52,15 @@ class VoxelEngine:
 
         self.scene_fbo = self.ctx.framebuffer(
             color_attachments=[
-                self.ctx.texture((WINDOW_WIDTH, WINDOW_HEIGHT), 4, samples=4, dtype="f4")
+                self.ctx.texture((WINDOW_WIDTH, WINDOW_HEIGHT), 4, samples=4, dtype="f4"),
+                self.ctx.texture((WINDOW_WIDTH, WINDOW_HEIGHT), 4, samples=4, dtype="f4"),
             ],
             depth_attachment=self.ctx.depth_renderbuffer((WINDOW_WIDTH, WINDOW_HEIGHT), samples=4),
         )
         self.resolve_fbo = self.ctx.framebuffer(
             color_attachments=[
-                self.ctx.texture((WINDOW_WIDTH, WINDOW_HEIGHT), 4, dtype="f4")
+                self.ctx.texture((WINDOW_WIDTH, WINDOW_HEIGHT), 4, dtype="f4"),
+                self.ctx.texture((WINDOW_WIDTH, WINDOW_HEIGHT), 4, dtype="f4"),
             ],
             depth_attachment=self.ctx.depth_texture((WINDOW_WIDTH, WINDOW_HEIGHT))
         )
