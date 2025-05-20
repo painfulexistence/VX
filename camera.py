@@ -12,7 +12,7 @@ class Camera:
         self.right = glm.vec3(1, 0, 0)
         self.forward = glm.vec3(0, 0, -1)
 
-        self.proj_matrix = glm.perspective(FOV, ASPECT_RATIO, NEAR_Z, FAR_Z)
+        self.proj_matrix = glm.perspective(glm.radians(FOV), ASPECT_RATIO, NEAR_Z, FAR_Z)
         self.view_matrix = self.get_view_matrix()
 
         self.frustum = Frustum(self.proj_matrix * self.view_matrix)

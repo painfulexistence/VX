@@ -9,16 +9,64 @@ layout(location = 0) out vec4 fragColor;
 
 uniform sampler2D u_screen_texture;
 uniform sampler2D u_noise_texture;
+uniform float u_exposure;
 uniform float u_time;
 
 in vec2 texcoord;
 
 
-float noise(vec2 p) {
-	float s = texture(u_noise_texture,vec2(1.,2.*cos(u_time))*u_time*8. + p*1.).x;
-	s *= s;
-	return s;
+const float gamma = 2.2;
+const float inv_gamma = 1.0 / gamma;
+
+vec3 exponential_tonemap(vec3 col) {
+    return vec3(1.0) - exp(-col);
 }
+
+vec3 aces_tonemap(vec3 col) {
+    float a = 2.51f;
+    float b = 0.03f;
+    float c = 2.43f;
+    float d = 0.59f;
+    float e = 0.14f;
+    return clamp((col * (a * col + b)) / (col * (c * col + d) + e), 0.0, 1.0);
+}
+
+vec3 uncharted2_tonemap(vec3 col) {
+    float A = 0.15;
+    float B = 0.50;
+    float C = 0.10;
+    float D = 0.20;
+    float E = 0.02;
+    float F = 0.30;
+    return ((col*(A*col+C*B)+D*E)/(col*(A*col+B)+D*F))-E/F;
+}
+
+float random(vec2 st) {
+    return fract(sin(dot(st.xy, vec2(12.9898,78.233*cos(u_time)))) * 43758.5453123);
+}
+
+float noise(vec2 st) {
+    vec2 i = floor(st);
+    vec2 f = fract(st);
+    
+    float a = random(i);
+    float b = random(i + vec2(1.0, 0.0));
+    float c = random(i + vec2(0.0, 1.0));
+    float d = random(i + vec2(1.0, 1.0));
+
+    vec2 u = f * f * (3.0 - 2.0 * f);
+
+    return mix(a, b, u.x) +
+            (c - a)* u.y * (1.0 - u.x) +
+            (d - b) * u.x * u.y;
+}
+
+// TODO: Add noise texture
+// float noise(vec2 p) {
+// 	float s = texture(u_noise_texture,vec2(1.,2.*cos(u_time))*u_time*8. + p*1.).x;
+// 	s *= s;
+// 	return s;
+// }
 
 float onOff(float a, float b, float c) {
 	return step(c, sin(u_time + a*cos(u_time*b)));
@@ -56,10 +104,14 @@ void main() {
 	float vignette = (1.-vigAmt*(uv.y-.5)*(uv.y-.5))*(1.-vigAmt*(uv.x-.5)*(uv.x-.5));
 	
     vec3 video = vec3(texture(u_screen_texture, look));
-	video += stripes(uv);
-	video += noise(uv*2.)/2.;
+	video = pow(video, vec3(gamma)); // sRGB to linear
+	video *= u_exposure; // Exposure
+	video = uncharted2_tonemap(video); // Tone mapping
+	// video += stripes(uv);
+	// video += noise(uv*2.)/2.; // Noisy pattern
 	video *= vignette;
 	video *= (12.+mod(uv.y*30.+u_time,1.))/13.;
+    video = pow(video, vec3(inv_gamma)); // Linear to sRGB
 	
 	fragColor = vec4(video, 1.0);
 }

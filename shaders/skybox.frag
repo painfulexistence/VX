@@ -9,13 +9,14 @@ uniform vec3 u_horizon_color;
 // uniform samplerCube skybox;
 
 
-vec3 skyboxColor(vec3 direction) {
+vec3 skybox_color(vec3 direction) {
     vec3 dir = normalize(direction);
     float t = (dir.y + 1.0) * 0.5;
     return mix(u_horizon_color, u_sky_color, t);
 }
 
 void main() {
-    // fragColor = texture(skybox, view_dir);
-    fragColor = vec4(skyboxColor(view_dir), 1.0);
+    // vec3 col = texture(skybox, view_dir);
+    vec3 col = skybox_color(view_dir);
+    fragColor = vec4(col, 1.0);
 }
