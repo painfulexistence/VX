@@ -60,7 +60,7 @@ class VoxelEngine:
             color_attachments=[
                 self.ctx.texture((WINDOW_WIDTH, WINDOW_HEIGHT), 4, dtype="f4")
             ],
-            depth_attachment=self.ctx.depth_renderbuffer((WINDOW_WIDTH, WINDOW_HEIGHT))
+            depth_attachment=self.ctx.depth_texture((WINDOW_WIDTH, WINDOW_HEIGHT))
         )
         self.brightness_fbo = self.ctx.framebuffer(
             color_attachments=[
@@ -120,11 +120,10 @@ class VoxelEngine:
             self.scene.update(dt)
 
             self.scene_fbo.use()
-            self.ctx.clear(color=SCENE_BG_COLOR)
+            self.ctx.clear(color=SCENE_BG_COLOR, depth=1.0)
             self.shaders["water"].program["u_time"] = elapsed_time;
             self.scene.render()
 
-            self.resolve_fbo.use()
             self.ctx.copy_framebuffer(self.resolve_fbo, self.scene_fbo)
 
             self.ctx.disable(gl.BLEND)
@@ -198,9 +197,13 @@ class VoxelEngine:
             # self.ctx.clear()
             self.ctx.disable(gl.DEPTH_TEST)
             self.bloom_fbo.color_attachments[0].use(0)
+            self.resolve_fbo.depth_attachment.use(1)
             self.shaders["post"].program["u_screen_texture"] = 0
+            self.shaders["post"].program["u_depth_texture"] = 1
             self.shaders["post"].program["u_time"] = elapsed_time
             self.shaders["post"].program["u_exposure"] = 1.5
+            self.shaders["post"].program["u_near_z"] = NEAR_Z
+            self.shaders["post"].program["u_far_z"] = FAR_Z
             self.post_quad.render()
             self.ctx.enable(gl.DEPTH_TEST)
 

@@ -3,8 +3,11 @@
 layout(location = 0) out vec4 fragColor;
 
 uniform sampler2D u_screen_texture;
+uniform sampler2D u_depth_texture;
 uniform float u_exposure;
 uniform float u_time;
+uniform float u_near_z;
+uniform float u_far_z;
 
 in vec2 texcoord;
 
@@ -35,10 +38,18 @@ vec3 uncharted2_tonemap(vec3 col) {
     return ((col*(A*col+C*B)+D*E)/(col*(A*col+B)+D*F))-E/F;
 }
 
+float linearize_depth(float depth) {
+    float z = depth * 2.0 - 1.0;
+    return 2.0 * u_near_z / (u_far_z + u_near_z - z * (u_far_z - u_near_z));
+}
+
 void main() {
     float _ = u_time;
 
     vec3 col = texture(u_screen_texture, texcoord).rgb;
+    float depth = texture(u_depth_texture, texcoord).r;
+    // float d = linearize_depth(depth);
+    // float d_norm = d / u_far_z;
 
     // sRGB to linear
     col = pow(col, vec3(gamma));

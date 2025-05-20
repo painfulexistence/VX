@@ -30,6 +30,7 @@ void main() {
 
     col = mix(col, ambient + diffuse + specular, 0.2);
 
+    // FIXME: depth calculation is wrong
     float dist = gl_FragCoord.z / gl_FragCoord.w;
     float height_factor = smoothstep(0.0, 24.0, frag_pos.y);
     vec3 fog_color = mix(u_fog_color * 0.5, u_fog_color, height_factor);
