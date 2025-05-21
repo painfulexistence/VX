@@ -8,7 +8,7 @@ class Water:
         self.ctx = ctx
         self.mesh = WaterMesh(ctx, shader, (CHUNK_SIZE * WORLD_WIDTH, CHUNK_SIZE * WORLD_DEPTH))
         self.shader = shader
-        self.deep_color = COLOR_MINT_GREEN
+        self.deep_color = COLOR_AZURE
         self.shallow_color = COLOR_MINT_GREEN
         self.wave_speed = 1.0
         self.wave_strength = 0.1
@@ -27,7 +27,9 @@ class Water:
     
         self.ctx.enable(gl.BLEND)
         self.ctx.disable(gl.CULL_FACE)
+        # self.ctx.depth_mask = False
         self.ctx.blend_func = gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA
         self.mesh.render()
+        # self.ctx.depth_mask = True
         self.ctx.disable(gl.BLEND)
         self.ctx.enable(gl.CULL_FACE)

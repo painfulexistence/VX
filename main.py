@@ -123,8 +123,16 @@ class VoxelEngine:
 
             self.scene_fbo.use()
             self.ctx.clear(color=SCENE_BG_COLOR, depth=1.0)
-            self.shaders["water"].program["u_time"] = elapsed_time;
-            self.scene.render()
+            self.scene.render_opaque()
+
+            self.ctx.copy_framebuffer(self.resolve_fbo, self.scene_fbo)
+
+            self.resolve_fbo.depth_attachment.use(0)
+            self.shaders["water"].program["u_depth_texture"] = 0
+            self.shaders["water"].program["u_time"] = elapsed_time
+            self.shaders["water"].program["u_near_z"] = NEAR_Z
+            self.shaders["water"].program["u_far_z"] = FAR_Z
+            self.scene.render_water()
 
             self.ctx.copy_framebuffer(self.resolve_fbo, self.scene_fbo)
 

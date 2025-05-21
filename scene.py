@@ -34,7 +34,7 @@ class Scene:
         self.player.update(dt)
         self.water.update(dt)
 
-    def render(self):
+    def render_opaque(self):
         view_matrix = glm.mat4(glm.mat3(self.player.view_matrix)) # getting rid of translation
         self.skybox_shader["m_proj"].write(self.player.proj_matrix)
         self.skybox_shader["m_view"].write(view_matrix)
@@ -57,8 +57,10 @@ class Scene:
         self.chunk_shader["u_light_color"].write(self.sun.light_color)
         self.world.render(self.camera)
 
+    def render_water(self):
         self.water_shader["m_proj"].write(self.player.proj_matrix)
         self.water_shader["m_view"].write(self.player.view_matrix)
+        self.water_shader["u_camera_pos"].write(self.player.position)
         self.water_shader["u_fog_color"].write(self.skybox.sky_color)
         self.water_shader["u_fog_density"].value = 0.00001
         self.water_shader["u_light_direction"].write(self.sun.light_direction)

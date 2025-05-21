@@ -14,7 +14,7 @@ uniform float u_wave_speed;
 out vec2 uv;
 out vec3 normal;
 out vec3 frag_pos;
-out float depth;
+out float view_depth;
 
 void main() {
     vec3 pos = in_position;
@@ -27,7 +27,7 @@ void main() {
     uv = in_texcoord;
     normal = mat3(transpose(inverse(m_model))) * in_normal;
     frag_pos = world_pos.xyz;
-    depth = (m_view * world_pos).z;
+    view_depth = -(m_view * world_pos).z;
 
     gl_Position = m_proj * m_view * world_pos;
 }
