@@ -8,11 +8,11 @@ class Water:
         self.ctx = ctx
         self.mesh = WaterMesh(ctx, shader, (CHUNK_SIZE * WORLD_WIDTH, CHUNK_SIZE * WORLD_DEPTH))
         self.shader = shader
-        self.deep_color = COLOR_AZURE
         self.shallow_color = COLOR_MINT_GREEN
+        self.deep_color = COLOR_INDIGO
         self.wave_speed = 1.0
         self.wave_strength = 0.1
-        z_offset = 0.01 # to avoid z-fighting
+        z_offset = 0.05 # to avoid z-fighting
         self.m_model = glm.translate(glm.mat4(), glm.vec3(0.0, WATER_LINE + z_offset, 0.0))
 
     def update(self, dt):

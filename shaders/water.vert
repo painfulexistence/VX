@@ -11,7 +11,7 @@ uniform float u_time;
 uniform float u_wave_strength;
 uniform float u_wave_speed;
 
-out vec2 uv;
+out vec2 texcoord;
 out vec3 normal;
 out vec3 frag_pos;
 out float view_depth;
@@ -24,7 +24,7 @@ void main() {
 
     vec4 world_pos = m_model * vec4(pos, 1.0);
         
-    uv = in_texcoord;
+    texcoord = in_texcoord;
     normal = mat3(transpose(inverse(m_model))) * in_normal;
     frag_pos = world_pos.xyz;
     view_depth = -(m_view * world_pos).z;

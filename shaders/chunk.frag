@@ -31,13 +31,12 @@ void main() {
 
     col = mix(col, ambient + diffuse + specular, 0.2);
 
-    // FIXME: depth calculation is wrong
-    float dist = gl_FragCoord.z / gl_FragCoord.w;
+    float dist = length(u_camera_pos - frag_pos);
     float height_factor = smoothstep(0.0, 24.0, frag_pos.y);
     vec3 fog_color = mix(u_fog_color * 0.5, u_fog_color, height_factor);
     col = mix(col, fog_color, 1.0 - exp(-u_fog_density * dist * dist));
 
-    if (frag_pos.y < u_water_line) {
+    if (u_camera_pos.y < u_water_line) {
         col *= 0.8;
         col = mix(col, u_under_water_color, 0.5);
     }

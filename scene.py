@@ -60,6 +60,8 @@ class Scene:
     def render_water(self):
         self.water_shader["m_proj"].write(self.player.proj_matrix)
         self.water_shader["m_view"].write(self.player.view_matrix)
+        self.water_shader["m_inv_proj"].write(glm.inverse(self.player.proj_matrix))
+        self.water_shader["m_inv_view"].write(glm.inverse(self.player.view_matrix))
         self.water_shader["u_camera_pos"].write(self.player.position)
         self.water_shader["u_fog_color"].write(self.skybox.sky_color)
         self.water_shader["u_fog_density"].value = 0.00001
