@@ -1,9 +1,11 @@
 # VX
 ![voxel engine screenshot](.github/media/screenshot.PNG)
 This is a voxel engine written in Python using Pygame and ModernGL. <br />
-I followed this amazing [tutorial](https://www.youtube.com/watch?v=Ab8TOSFfNp4) from Coder Space, and then deviated to experiment with various rendering techniques, hopefully to create a more unique and interesting visual.
+I followed this amazing [tutorial](https://www.youtube.com/watch?v=Ab8TOSFfNp4) from Coder Space, and then deviated to experiment with various rendering techniques, hopefully to create a more unique and interesting visual. <br />
+
 ### Demo
 https://www.youtube.com/watch?v=st6FL2xLPZE
+
 
 ## Getting Started
 ### Prerequisites
@@ -25,4 +27,6 @@ uv run main.py
 
 
 ## License
-Distributed under the Unlicense License. See `LICENSE.txt` for more information.
+This project is distributed under the Unlicense License. See `LICENSE.txt` for more information.
+
+Note: The VHS post-processing shader (`shaders/post_vhs.frag`) is licensed under CC BY-NC-SA 4.0, forked from [Ryk's VCR distortion shader](https://www.shadertoy.com/view/ldjGzV).
