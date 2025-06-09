@@ -38,7 +38,7 @@ class VoxelEngine:
         self.shaders = {
             "quad": ShaderProgram(self.ctx, "quad"),
             "chunk": ShaderProgram(self.ctx, "chunk"),
-            "post": ShaderProgram(self.ctx, "post"),
+            "post": ShaderProgram(self.ctx, "post_crt"),
             "skybox": ShaderProgram(self.ctx, "skybox"),
             "sun": ShaderProgram(self.ctx, "sun"),
             "water": ShaderProgram(self.ctx, "water"),

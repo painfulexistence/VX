@@ -18,6 +18,7 @@ uniform vec3 u_light_color;
 uniform float u_near_z = 0.1;
 uniform float u_far_z = 2000.0;
 uniform vec3 u_camera_pos;
+uniform float u_water_line;
 uniform mat4 m_inv_proj;
 uniform mat4 m_inv_view;
 
@@ -38,6 +39,18 @@ vec3 reconstruct_world_pos_from_depth(vec2 screen_uv, float depth) {
 }
 
 void main() {
+    vec3 norm = normalize(normal);
+    vec3 view_dir = normalize(u_camera_pos - frag_pos);
+    vec3 light_dir = normalize(-u_light_direction);
+    vec3 half_dir = normalize(light_dir + view_dir);
+
+    if (u_camera_pos.y < u_water_line) {
+        vec3 col = mix(u_shallow_color, u_deep_color, smoothstep(2.0, 32.0, u_water_line - u_camera_pos.y));
+        fragColor = vec4(col, 0.9);
+        fragNormal = vec4(norm, 1.0);
+        return;
+    }
+
     vec2 screen_uv = gl_FragCoord.xy / textureSize(u_depth_texture, 0);
     float depth = texture(u_depth_texture, screen_uv).r;
     vec3 depth_world_pos = reconstruct_world_pos_from_depth(screen_uv, depth);
@@ -45,11 +58,6 @@ void main() {
     float water_thickness = max(frag_pos.y - depth_world_pos.y, 0.0);
     float beer_factor = max(1.0 - exp(-water_thickness * beer_absorption_coef), 0.0);
     vec3 col = mix(u_shallow_color, u_deep_color, beer_factor);
-
-    vec3 norm = normalize(normal);
-    vec3 view_dir = normalize(u_camera_pos - frag_pos);
-    vec3 light_dir = normalize(-u_light_direction);
-    vec3 half_dir = normalize(light_dir + view_dir);
 
     float diff = max(dot(norm, light_dir), 0.0);
     float spec = pow(max(dot(norm, half_dir), 0.0), 128.0);

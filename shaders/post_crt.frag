@@ -63,10 +63,10 @@ void main() {
     col = pow(col, vec3(gamma));
 
     // Exposure
-    col *= u_exposure;
+    col *= u_exposure * 0.66;
 
     // Tone mapping
-    col = uncharted2_tonemap(col);
+    // col = exponential_tonemap(col);
     
     // Linear to sRGB
     col = pow(col, vec3(inv_gamma));

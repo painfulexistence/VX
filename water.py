@@ -24,6 +24,7 @@ class Water:
         self.shader["u_shallow_color"].write(self.shallow_color)
         self.shader["u_wave_speed"].value = self.wave_speed
         self.shader["u_wave_strength"].value = self.wave_strength
+        self.shader["u_water_line"].value = WATER_LINE
     
         self.ctx.enable(gl.BLEND)
         self.ctx.disable(gl.CULL_FACE)

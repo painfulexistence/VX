@@ -37,7 +37,7 @@ void main() {
     col = mix(col, fog_color, 1.0 - exp(-u_fog_density * dist * dist));
 
     if (u_camera_pos.y < u_water_line) {
-        col *= 0.8;
+        col *= 1.0 - smoothstep(0.0, 16.0, u_water_line - u_camera_pos.y) * 0.5;
         col = mix(col, u_under_water_color, 0.5);
     }
 
