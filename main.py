@@ -208,12 +208,16 @@ class VoxelEngine:
             self.ctx.disable(gl.DEPTH_TEST)
             self.bloom_fbo.color_attachments[0].use(0)
             self.resolve_fbo.depth_attachment.use(1)
+            self.resolve_fbo.color_attachments[1].use(2)
             self.shaders["post"].program["u_screen_texture"] = 0
-            self.shaders["post"].program["u_depth_texture"] = 1
+            # self.shaders["post"].program["u_depth_texture"] = 1
+            # self.shaders["post"].program["u_normal_texture"] = 2
             self.shaders["post"].program["u_time"] = elapsed_time
             self.shaders["post"].program["u_exposure"] = 1.5
-            self.shaders["post"].program["u_near_z"] = NEAR_Z
-            self.shaders["post"].program["u_far_z"] = FAR_Z
+            # self.shaders["post"].program["u_near_z"] = NEAR_Z
+            # self.shaders["post"].program["u_far_z"] = FAR_Z
+            # self.shaders["post"].program["m_inv_proj"].write(glm.inverse(self.scene.camera.proj_matrix))
+            # self.shaders["post"].program["m_inv_view"].write(glm.inverse(self.scene.camera.view_matrix))
             self.post_quad.render()
             self.ctx.enable(gl.DEPTH_TEST)
 
